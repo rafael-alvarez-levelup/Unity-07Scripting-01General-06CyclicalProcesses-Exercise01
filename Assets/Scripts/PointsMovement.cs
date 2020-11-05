@@ -1,52 +1,71 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// This class moves a game object along a series of points.
+/// </summary>
 public class PointsMovement : MonoBehaviour
 {
+    #region Properties
+
     public int Loops { get; private set; }
 
-    [SerializeField]
-    private List<Vector3> _values;
+    #endregion
 
-    [SerializeField]
-    private float _transition = 2f;
+    #region Private Variables
 
-    private Vector3 _currentValue;
+    [SerializeField] private List<Vector3> values;
+    [SerializeField] private float transition = 2f;
 
-    private float _transitionStep;
+    private Vector3 currentValue;
+    private int valueIndex;
+    private float transitionStep;
 
-    private int _valueIndex;
+    #endregion
+
+    #region Unity Methods
 
     private void Start()
     {
-        _transitionStep = 0;
-
-        _valueIndex = 0;
-
         Loops = 0;
+        currentValue = transform.position;
+        valueIndex = 0;
+        transitionStep = 0;
 
-        _currentValue = transform.position;
+        StartCoroutine(PointsMovementRoutine());
     }
 
-    void Update()
+    #endregion
+
+    #region Coroutines
+
+    private IEnumerator PointsMovementRoutine()
     {
-        if (_transition > _transitionStep)
+        while (true)
         {
-            _transitionStep += Time.deltaTime;
+            if (transition > transitionStep)
+            {
+                transitionStep += Time.deltaTime;
 
-            float step = _transitionStep / _transition;
+                float step = transitionStep / transition;
 
-            transform.position = Vector3.Lerp(_currentValue, _values[_valueIndex], step);
-        }
-        else
-        {
-            _transitionStep = 0;
+                transform.position = Vector3.Lerp(currentValue, values[valueIndex], step);
+            }
+            else
+            {
+                transitionStep = 0;
 
-            _currentValue = _values[_valueIndex];
+                currentValue = values[valueIndex];
 
-            _valueIndex = (_valueIndex + 1) % _values.Count;
+                valueIndex = (valueIndex + 1) % values.Count;
 
-            Loops++;
+                Loops++;
+            }
+
+            yield return new WaitForSeconds(Time.deltaTime);
         }
     }
+
+    #endregion
 }

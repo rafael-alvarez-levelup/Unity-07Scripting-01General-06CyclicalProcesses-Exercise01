@@ -1,60 +1,77 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// This class change the color of a game object through interpolation.
+/// </summary>
 public class ChangeColor : MonoBehaviour
 {
+    #region Properties
+
     public int Loops { get; private set; }
 
-    [SerializeField]
-    private List<Color> _values;
+    #endregion
 
-    [SerializeField]
-    private float _transition = 2f;
+    #region Private Variables
 
-    private float _transitionStep;
+    [SerializeField] private List<Color> values;
+    [SerializeField] private float transition = 2f;
 
-    private Renderer _myRenderer;
+    private Renderer myRenderer;
+    private Color currentValue;
+    private int valueIndex;
+    private float transitionStep;
 
-    private Color _currentValue;
+    #endregion
 
-    private int _valueIndex;
+    #region Unity Methods
 
     private void Awake()
     {
-        _myRenderer = GetComponent<Renderer>();
+        myRenderer = GetComponent<Renderer>();
     }
 
     private void Start()
     {
-        _transitionStep = 0;
-
-        _currentValue = _myRenderer.material.color;
-
-        _valueIndex = 0;
-
         Loops = 0;
+        currentValue = myRenderer.material.color;
+        valueIndex = 0;
+        transitionStep = 0;
+
+        StartCoroutine(ChangeColorRoutine());
     }
 
-    void Update()
+    #endregion
+
+    #region Coroutines
+
+    private IEnumerator ChangeColorRoutine()
     {
-
-        if (_transition > _transitionStep)
+        while (true)
         {
-            _transitionStep += Time.deltaTime;
+            if (transition > transitionStep)
+            {
+                transitionStep += Time.deltaTime;
 
-            float step = _transitionStep / _transition;
+                float step = transitionStep / transition;
 
-            _myRenderer.material.color = Color.Lerp(_currentValue, _values[_valueIndex], step);
-        }
-        else
-        {
-            _transitionStep = 0;
+                myRenderer.material.color = Color.Lerp(currentValue, values[valueIndex], step);
+            }
+            else
+            {
+                transitionStep = 0;
 
-            _currentValue = _values[_valueIndex];
+                currentValue = values[valueIndex];
 
-            _valueIndex = (_valueIndex + 1) % _values.Count;
+                valueIndex = (valueIndex + 1) % values.Count;
 
-            Loops++;
+                Loops++;
+            }
+
+            yield return new WaitForSeconds(Time.deltaTime);
         }
     }
+
+    #endregion
 }
