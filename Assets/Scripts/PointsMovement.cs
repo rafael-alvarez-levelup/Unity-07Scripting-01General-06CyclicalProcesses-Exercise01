@@ -1,71 +1,17 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 /// <summary>
 /// This class moves a game object along a series of points.
 /// </summary>
-public class PointsMovement : MonoBehaviour
+public class PointsMovement : TransitionBase<Vector3>
 {
-    #region Properties
-
-    public int Loops { get; private set; }
-
-    #endregion
-
-    #region Private Variables
-
-    [SerializeField] private List<Vector3> values;
-    [SerializeField] private float transition = 2f;
-
-    private Vector3 currentValue;
-    private int valueIndex;
-    private float transitionStep;
-
-    #endregion
-
-    #region Unity Methods
-
-    private void Start()
+    protected override void SetInitialValue()
     {
-        Loops = 0;
-        currentValue = transform.position;
-        valueIndex = 0;
-        transitionStep = 0;
-
-        StartCoroutine(PointsMovementRoutine());
+        SetCurrentValue(transform.position);
     }
 
-    #endregion
-
-    #region Coroutines
-
-    private IEnumerator PointsMovementRoutine()
+    protected override void Lerp(Vector3 current, Vector3 next, float step)
     {
-        while (true)
-        {
-            if (transition > transitionStep)
-            {
-                transitionStep += Time.deltaTime;
-
-                float step = transitionStep / transition;
-
-                transform.position = Vector3.Lerp(currentValue, values[valueIndex], step);
-            }
-            else
-            {
-                transitionStep = 0;
-
-                currentValue = values[valueIndex];
-
-                valueIndex = (valueIndex + 1) % values.Count;
-
-                Loops++;
-            }
-
-            yield return new WaitForSeconds(Time.deltaTime);
-        }
+        transform.position = Vector3.Lerp(current, next, step);
     }
-
-    #endregion
 }
